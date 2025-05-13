@@ -1,22 +1,31 @@
 import { Sequelize } from "sequelize";
+import dotenv from "dotenv";
 
-// Create Sequelize instance
-const sequelize = new Sequelize("todo", "postgres", "malik123", {
-  host: "localhost",
+dotenv.config(); // Load env variables from .env
+
+// Create Sequelize instance using DATABASE_URL from .env
+const sequelize = new Sequelize(process.env.DATABASE_URL, {
   dialect: "postgres",
+  protocol: "postgres",
+  dialectOptions: {
+    ssl: {
+      require: true,
+      rejectUnauthorized: false, // Needed for Neon
+    },
+  },
 });
 
 // Connect function
 const connection = async () => {
   try {
     await sequelize.authenticate();
-    console.log("Connection has been established successfully.");
+    console.log("✅ Connection has been established successfully.");
 
     // Sync all models to the database
-    await sequelize.sync(); // Ensure tables are created (if they don't exist)
-    console.log("Database synced successfully.");
+    await sequelize.sync();
+    console.log("✅ Database synced successfully.");
   } catch (error) {
-    console.error("Unable to connect to the database:", error);
+    console.error("❌ Unable to connect to the database:", error);
   }
 };
 
